@@ -34,3 +34,5 @@ kisumu_filtered = kisumu_data %>%
   filter(ever.homeless == "yes") %>%
   select(subject.identification.number, glue.ever, onstrt_new, edatt_cat_new, age, elec) %>%
   na.omit(kisumu_data)
+
+##
