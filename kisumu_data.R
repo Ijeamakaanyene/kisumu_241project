@@ -10,7 +10,7 @@ library(dplyr)
 #####################
 
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
-kisumu_data = read.csv("/Users/ijeamakaanyene/kisumu_241project/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
+kisumu_data = read.csv("/Users/emilyliu/Desktop/Spring_2019/241 Stats/kisumu_241project/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
 ## Outcome: Glue Sniffing. Use variable glue.ever: 0 - no, 1 - yes
 
@@ -85,6 +85,8 @@ summary(beautifulmodelone)
 ### 2nd Logistic Regression ###
 ###############################
 
-edu_length_time_lm = glm(glue.ever ~ onstrt_new + edatt, family = binomial(link = "logit"), data = kisumu_filtered)
+# Interaction between length on street and education
+
+edu_length_time_lm = glm(glue.ever ~ onstrt_new + edatt_cat_new * onstrt_new, family = binomial(link = "logit"), data = kisumu_filtered)
 summary(edu_length_time_lm)
 
