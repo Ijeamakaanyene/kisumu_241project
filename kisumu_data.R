@@ -15,11 +15,10 @@ kisumu_data = read.csv("/Users/ijeamakaanyene/kisumu_241project/Kisumu Street Yo
 ## Outcome: Glue Sniffing. Use variable glue.ever: 0 - no, 1 - yes
 
 ## Exposure: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
-kisumu_data$onstrt_new = as.factor(kisumu_data$onstrt_new)
+
 
 ## Confounders: 
 #Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
-kisumu_data$edatt_cat_new = as.factor(kisumu_data$edatt_cat_new)
 
 #Age. Use variable age (keeping continuous)
 
@@ -28,7 +27,7 @@ kisumu_data = kisumu_data %>%
   mutate(elec = if_else(electricity == "yes", 1, 
                        if_else(electricity == "no", 0, 
                                if_else(is.na(electricity) == TRUE, 2, 2))))
-kisumu_data$elec = as.factor(kisumu_data$elec)
+
 
 kisumu_filtered = kisumu_data %>%
   filter(ever.homeless == "yes") %>%
