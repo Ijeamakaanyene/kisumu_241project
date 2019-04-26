@@ -80,6 +80,21 @@ beautifulmodelone <- glm(formula=glue.ever ~ age + elec,
                          family=binomial(link='logit'), data=kisumu_filtered)
 summary(beautifulmodelone)
 
+othermodelone <- glm(formula=glue.ever ~ age,
+                     family=binomial(link='logit'), data=kisumu_filtered)
+summary(othermodelone)
+
+library(lmtest)
+lrtest(beautifulmodelone, othermodelone)
+##We fail to reject the null that one model is better than the other. 
+##Therefore, we can opt to use the model with age and electricity (beautifulmodelone).
+
+##Assessing multicollinearity
+summary(beautifulmodelone)$coef
+
+vars <- kisumu_filtered %>%
+  dplyr::select(age, elec)
+
 
 ###############################
 ### 2nd Logistic Regression ###
