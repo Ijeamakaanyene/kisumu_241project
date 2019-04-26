@@ -12,7 +12,7 @@ library(ResourceSelection)
 #####################
 
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
-kisumu_data = read.csv("/Users/ijeamakaanyene/Desktop/Berkeley Coursework/Spring_2019/Statistical Analysis of Categorical Data/Assignments/Final Projects/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
+kisumu_data = read.csv("~/Berkeley/Spring 2019/PH 241/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
 ## Outcome: Glue Sniffing. Use variable glue.ever: 0 - no, 1 - yes
 
@@ -79,19 +79,39 @@ summary(elec.v.glue)
 # CREATING MODELS
 #For each covariate with a p-value < .2 add to model
 
-model1 <- glm(formula=glue ~ onstrt_new + edatt_cat_new, 
+model1 <- glm(formula=glue ~ onstrt_new + elec+ edatt_cat_new, 
               family=binomial(link='logit'), data=kisumu_filtered)
 summary(model1)
 
-model2 <- glm(formula=glue ~ onstrt_new + elec + edatt_cat_new,
+# Both Time on Street and Electricity have p-values > 0.05
+
+model2 <- glm(formula=glue ~ onstrt_new + edatt_cat_new,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
 
+# Time on street still not significant
+
+model3 <- glm(formula=glue ~ elec + edatt_cat_new,
+                  family=binomial(link='logit'), data=kisumu_filtered)
+
+summary(model3)
+
+# Electricity still not significant
+ 
+model4 <- glm(formula=glue ~ edatt_cat_new,
+              family=binomial(link='logit'), data=kisumu_filtered)
+
+summary(model4)
+
+
 # LIKELIHOOD RATIO TEST
 lrtest(model1, model2)
+lrtest(model1,model3)
+lrtest(model1, model4)
 
 # We fail to reject the null that the simpler is better than complex. 
-# Therefore, we can opt to use the model with education (model 1)
+# Therefore, we can opt to use the model with electricity and time on the street (model 1)
+# I changed some things around and added 3 & 4. We might not need 2 or 3 but I'm pretty sure 4 is important although the conclusion is the same.
 
 # ASSESSING COLLINEARITY
 vars <- kisumu_filtered %>%
