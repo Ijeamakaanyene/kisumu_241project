@@ -12,9 +12,9 @@ library(ResourceSelection)
 #####################
 
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
-kisumu_data = read.csv("~/Berkeley/Spring 2019/PH 241/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
+kisumu_data = read.csv("/Users/ijeamakaanyene/Desktop/Berkeley Coursework/Spring_2019/Statistical Analysis of Categorical Data/Assignments/Final Projects/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
-## Outcome: Glue Sniffing. Use variable glue.ever: 0 - no, 1 - yes
+## Outcome: Glue Sniffing. Use variable glue: 0 - no, 1 - yes
 
 
 ## Exposure: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
@@ -35,8 +35,9 @@ kisumu_data = kisumu_data %>%
 kisumu_filtered = kisumu_data %>%
   filter(ever.homeless == "yes") %>%
   select(subject.identification.number, glue.ever, onstrt_new, edatt_cat_new, age, elec) %>%
-  mutate(glue = if_else(glue.ever == "yes", 1, if_else(glue.ever == "no", 0, 2))) %>% na.omit(kisumu_data) %>% 
-  filter(glue != 2)
+  mutate(glue = if_else(glue.ever == "yes", 1, if_else(glue.ever == "no", 0, 2))) %>% 
+  na.omit(kisumu_data) %>% 
+  filter(glue != 2, elec != 2)
 
 #kisumu_filtered = kisumu_filtered %>% mutate(age_centered = age - 17)
 
@@ -47,7 +48,7 @@ kisumu_filtered = kisumu_data %>%
 # PAIRWISE COMPARISONS
 
 # Length of Time (<1 yr vs. > 1 yr) and Glue Sniffing (unadjusted)
-# p-value: 0.0718
+# p-value: 0.0663
 
 timestreet.v.glue <- glm(formula=glue ~ onstrt_new,
                          family=binomial(link='logit'), data=kisumu_filtered)
@@ -55,7 +56,7 @@ summary(timestreet.v.glue)
 
 
 # Education and Glue Sniffing
-# p-value: 0.00292
+# p-value: 0.00415
 
 education.v.glue <- glm(formula=glue ~ edatt_cat_new,
                         family=binomial(link='logit'), data=kisumu_filtered)
@@ -63,14 +64,14 @@ education.v.glue <- glm(formula=glue ~ edatt_cat_new,
 summary(education.v.glue)
 
 #Age and Glue Sniffing
-# p-value: 0.69
+# p-value: 0.667
 
 age.v.glue <- glm(formula=glue ~ age,
                   family=binomial(link='logit'), data=kisumu_filtered)
 summary(age.v.glue)
 
 # Electricity at home and glue sniffing 
-# p-vlue: 0.0864
+# p-vlue: 0.133
 
 elec.v.glue <- glm(formula=glue ~ elec,
                    family=binomial(link='logit'), data=kisumu_filtered)
@@ -89,29 +90,21 @@ model2 <- glm(formula=glue ~ onstrt_new + edatt_cat_new,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
 
-# Time on street still not significant
-
-model3 <- glm(formula=glue ~ elec + edatt_cat_new,
-                  family=binomial(link='logit'), data=kisumu_filtered)
-
-summary(model3)
-
-# Electricity still not significant
- 
-model4 <- glm(formula=glue ~ edatt_cat_new,
-              family=binomial(link='logit'), data=kisumu_filtered)
-
-summary(model4)
+# Other Models
+#model3 <- glm(formula=glue ~ elec + edatt_cat_new,
+                  #family=binomial(link='logit'), data=kisumu_filtered)
+#summary(model3)
+#model4 <- glm(formula=glue ~ edatt_cat_new,
+              #family=binomial(link='logit'), data=kisumu_filtered)
+#summary(model4)
 
 
 # LIKELIHOOD RATIO TEST
 lrtest(model1, model2)
-lrtest(model1,model3)
-lrtest(model1, model4)
+
 
 # We fail to reject the null that the simpler is better than complex. 
 # Therefore, we can opt to use the model with electricity and time on the street (model 1)
-# I changed some things around and added 3 & 4. We might not need 2 or 3 but I'm pretty sure 4 is important although the conclusion is the same.
 
 # ASSESSING COLLINEARITY
 vars <- kisumu_filtered %>%
@@ -124,7 +117,7 @@ cor(vars)
 ###############################
 
 # Interaction between time on street and education 
-# No Interaction - p-value of 0.959
+# No Interaction - p-value of 0.919
 length_edu = glm(glue ~ onstrt_new + edatt_cat_new + onstrt_new * edatt_cat_new, 
                  family = binomial(link = "logit"), data = kisumu_filtered)
 summary(length_edu)
