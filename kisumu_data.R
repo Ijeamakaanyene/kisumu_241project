@@ -34,6 +34,7 @@ kisumu_filtered = kisumu_data %>%
   select(subject.identification.number, glue.ever, onstrt_new, edatt_cat_new, age, elec) %>%
   na.omit(kisumu_data)
 
+kisumu_filtered = kisumu_filtered %>% mutate(age_centered = age - 17)
 
 ###############################
 ### 1st Logistic Regression ###
@@ -86,7 +87,41 @@ summary(beautifulmodelone)
 ###############################
 
 # Interaction between length on street and education
-
-edu_length_time_lm = glm(glue.ever ~ onstrt_new + edatt_cat_new * onstrt_new, family = binomial(link = "logit"), data = kisumu_filtered)
+# No significant interaction
+edu_length_time_lm = glm(glue.ever ~ onstrt_new + edatt_cat_new + edatt_cat_new * onstrt_new, family = binomial(link = "logit"), data = kisumu_filtered)
 summary(edu_length_time_lm)
+
+# Interaction between length on street and age
+# No significant interaction
+age_length_time = glm(glue.ever ~ onstrt_new + age + onstrt_new * age, family = binomial(link = "logit"), data = kisumu_filtered)
+summary(age_length_time)
+
+# Interaction between length on street and electricity
+# No significant interaction
+elec_length_time = glm(glue.ever ~ onstrt_new + elec + elec * onstrt_new, family = binomial(link = "logit"), data = kisumu_filtered)
+summary(elec_length_time)
+
+# Interaction between age and electricity
+# Interesting interaction / p-value of 0.0536
+elec_age = glm(glue.ever ~ onstrt_new + elec + age + elec * age, family = binomial(link = "logit"), data = kisumu_filtered)
+summary(elec_age)
+
+# Interaction between age and education
+# No significant interaction
+age_edu = glm(glue.ever ~ onstrt_new + age + edatt_cat_new + age * edatt_cat_new, family = binomial(link = "logit"), data = kisumu_filtered)
+summary(age_edu)
+
+# Assess collinearity
+# Electricity and the interaction term are highly correlated (0.98887291)
+vars_int = kisumu_filtered %>%
+  mutate(int = elec*age_centered) %>%
+  select(age_centered, elec, int)
+
+cor(vars_int)
+
+# Centering age (see above)
+# Median age = 17
+summary(kisumu_filtered$age)
+
+
 
