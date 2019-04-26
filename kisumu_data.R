@@ -17,14 +17,12 @@ library(ResourceSelection)
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
 kisumu_data = read.csv("/Users/ijeamakaanyene/Desktop/Berkeley Coursework/Spring_2019/Statistical Analysis of Categorical Data/Assignments/Final Projects/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
-## Outcome: Glue Sniffing. Use variable glue: 0 - no, 1 - yes
+## Exposure: Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
 
-
-## Exposure: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
-
+## Outcome: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
 
 ## Confounders: 
-#Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
+# Glue Sniffing. Use variable glue: 0 - no, 1 - yes
 
 #Age. Use variable age (keeping continuous)
 
@@ -49,6 +47,17 @@ kisumu_filtered = kisumu_data %>%
 ###############################
 
 # PAIRWISE COMPARISONS
+
+
+# Education and Length of Time on Street (unadjusted)
+edu.v.timestreet = glm()
+
+
+
+
+
+
+
 
 # Length of Time (<1 yr vs. > 1 yr) and Glue Sniffing (unadjusted)
 # p-value: 0.0663
