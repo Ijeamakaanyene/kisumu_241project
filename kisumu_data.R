@@ -48,79 +48,65 @@ kisumu_filtered = kisumu_data %>%
 
 # PAIRWISE COMPARISONS
 
+# Test out ethnicity as a confounder. 
 
 # Education and Length of Time on Street (unadjusted)
-edu.v.timestreet = glm()
-
-
-
-
-
-
-
+# p-value: 0.309 
+edu.v.timestreet = glm(onstrt_new ~ edatt_cat_new, family = binomial, data = kisumu_filtered)
+summary(edu.v.timestreet)
 
 # Length of Time (<1 yr vs. > 1 yr) and Glue Sniffing (unadjusted)
 # p-value: 0.0663
-
-timestreet.v.glue <- glm(formula=glue ~ onstrt_new,
+timestreet.v.glue <- glm(onstrt_new ~ glue,
                          family=binomial(link='logit'), data=kisumu_filtered)
 summary(timestreet.v.glue)
 
+# Age and Length on Time on Street (unadjusted)
+# p-value: 2.39e-07
+age.v.timestreet = glm(onstrt_new ~ age, family = binomial, data = kisumu_filtered)
+summary(age.v.timestreet)
 
-# Education and Glue Sniffing
-# p-value: 0.00415
-
-education.v.glue <- glm(formula=glue ~ edatt_cat_new,
-                        family=binomial(link='logit'), data=kisumu_filtered)
-
-summary(education.v.glue)
-
-#Age and Glue Sniffing
-# p-value: 0.667
-
-age.v.glue <- glm(formula=glue ~ age,
-                  family=binomial(link='logit'), data=kisumu_filtered)
-summary(age.v.glue)
-
-# Electricity at home and glue sniffing 
-# p-vlue: 0.133
-
-elec.v.glue <- glm(formula=glue ~ elec,
+# Electricity at home and length of time on street (unadjusted)
+# p-vlue: 0.422
+elec.v.timestreet = glm(onstrt_new ~ elec,
                    family=binomial(link='logit'), data=kisumu_filtered)
-summary(elec.v.glue)
+summary(elec.v.timestreet)
 
 # CREATING MODELS
 #For each covariate with a p-value < .2 add to model
 
-model1 <- glm(formula=glue ~ onstrt_new + elec+ edatt_cat_new, 
+# Comparing Models w/ and without Glue
+model1 <- glm(onstrt_new ~ edatt_cat_new + glue + age, 
               family=binomial(link='logit'), data=kisumu_filtered)
 summary(model1)
 
-# Both Time on Street and Electricity have p-values > 0.05
 
-model2 <- glm(formula=glue ~ onstrt_new + edatt_cat_new,
+model2 <- glm(onstrt_new ~ edatt_cat_new + age,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
 
-# Other Models
-#model3 <- glm(formula=glue ~ elec + edatt_cat_new,
-                  #family=binomial(link='logit'), data=kisumu_filtered)
-#summary(model3)
-#model4 <- glm(formula=glue ~ edatt_cat_new,
-              #family=binomial(link='logit'), data=kisumu_filtered)
-#summary(model4)
 
+#Comparing Models w/ and without Electricity 
+model3 = glm(onstrt_new ~ edatt_cat_new + age + elec, 
+             family = binomial, data = kisumu_filtered)
+summary(model3)
+
+model4 = glm(onstrt_new ~ edatt_cat_new + age, 
+             family = binomial, data = kisumu_filtered)
+summary(model4)
 
 # LIKELIHOOD RATIO TEST
 lrtest(model1, model2)
+# We fail to reject the null that the simpler is better than the complex
+# Therefore, we can opt to use the model with glue and age (model 2)
 
-
+lrtest(model3, model4)
 # We fail to reject the null that the simpler is better than complex. 
-# Therefore, we can opt to use the model with electricity and time on the street (model 1)
+# Therefore, we can opt to use the model with electrity and age (model 4)
 
 # ASSESSING COLLINEARITY
 vars <- kisumu_filtered %>%
-  dplyr::select(onstrt_new, edatt_cat_new)
+  dplyr::select(onstrt_new, edatt_cat_new, age, glue)
 
 cor(vars)
 
@@ -128,42 +114,23 @@ cor(vars)
 ### 2nd Logistic Regression ###
 ###############################
 
-# Interaction between time on street and education 
-# No Interaction - p-value of 0.919
-length_edu = glm(glue ~ onstrt_new + edatt_cat_new + onstrt_new * edatt_cat_new, 
-                 family = binomial(link = "logit"), data = kisumu_filtered)
-summary(length_edu)
+# Interaction between age and electricity 
+# No interaction - p-value of 0.68
+age_elec = glm(onstrt_new ~ edatt_cat_new + age + elec + age*elec, 
+               family = binomial, data = kisumu_filtered)
 
+summary(age_elec)
 
-# Interaction between length on street and age
-# No significant interaction
-#age_length_time = glm(glue.ever ~ onstrt_new + age + onstrt_new * age, 
-                      #family = binomial(link = "logit"), data = kisumu_filtered)
+# Interaction between education and age 
+# No interaction - p-value of 0.68
+age_edu = glm(onstrt_new ~ edatt_cat_new + age + elec + age*edatt_cat_new, 
+               family = binomial, data = kisumu_filtered)
 
-#summary(age_length_time)
+summary(age_elec)
 
-# Interaction between length on street and electricity
-# No significant interaction
-elec_length_time = glm(glue ~ onstrt_new + elec + elec * onstrt_new, 
-                       family = binomial(link = "logit"), data = kisumu_filtered)
-
-summary(elec_length_time)
-
-# Interaction between age and electricity
-# Interesting interaction / p-value of 0.0536
-#elec_age = glm(glue.ever ~ onstrt_new + elec + age_centered + elec * age_centered, 
-               #family = binomial(link = "logit"), data = kisumu_filtered)
-
-#summary(elec_age)
-
-# Interaction between education and electricity
-# No significant interaction
-edu_elect = glm(glue ~ onstrt_new + elec + edatt_cat_new + elec*edatt_cat_new, 
-                family = binomial(link = "logit"), data = kisumu_filtered)
-summary(edu_elect)
 
 ## QUESTION FOR SUZANNE: WE HAVE NO INTERACTION TERMS. YAY? NAY? SHOULD WE LOOK AT MORE COVARIATES.
-# CAN WE KEEP AGE IS A CONFOUNDER BASED OFF OF OUR DAG- EVEN IF THE P-VALUE IS GREATER THAN .05
+# ANSWER: ITS OKAY! 
 
 # ASSESS COLLINEARITY
 # Electricity and the interaction term are highly correlated (0.98887291)
@@ -187,8 +154,8 @@ summary(edu_elect)
 # GOODNESS OF FIT TEST
 
 hoslem.test(kisumu_filtered$glue, fitted(model1), g = 5)
-#  Null hypothesis is that the model sufficients fits my data
-# Stick with five 
+#  Null hypothesis is that the model sufficiently fits my data
+# Stick with around five quantiles
 
 
 
