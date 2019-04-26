@@ -11,6 +11,9 @@ library(ResourceSelection)
 ### Data Cleaning ###
 #####################
 
+# Change outcome to drug use in the past months 
+
+
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
 kisumu_data = read.csv("/Users/ijeamakaanyene/Desktop/Berkeley Coursework/Spring_2019/Statistical Analysis of Categorical Data/Assignments/Final Projects/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
@@ -168,9 +171,15 @@ summary(edu_elect)
 
 #lrtest(elec_age, model1)
 
+############################
+### Goodness of Fit Test ###
+############################
+
 # GOODNESS OF FIT TEST
 
 hoslem.test(kisumu_filtered$glue, fitted(model1), g = 5)
+#  Null hypothesis is that the model sufficients fits my data
+# Stick with five 
 
 
 
