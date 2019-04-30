@@ -11,20 +11,17 @@ library(ResourceSelection)
 ### Data Cleaning ###
 #####################
 
-# Change outcome to drug use in the past months 
-
-
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
 kisumu_data = read.csv("/Users/emilyliu/Desktop/Spring_2019/241 Stats/kisumu_241project/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
 ## Exposure: Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
-
 ## Outcome: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
 
-## Confounders: 
+## Confounders: AGE, ORPHAN STATUS, FAMILY WEALTH
 
-#Age. Use variable age (keeping continuous)
+# AGE: Use variable age (keeping continuous)
 
+# ORPHAN
 # Create variable with orphan (either parent) -> no = 0, single = 1, double = 2 
 kisumu_data = kisumu_data %>%
   mutate(orphan = if_else(dborphan == "double orphan", 2, 
@@ -32,32 +29,26 @@ kisumu_data = kisumu_data %>%
                                   if_else(dborphan == "parents living", 0, 3)))) %>% 
   filter(orphan != 3)
 
+# Convert orphan into factor
 kisumu_data$orphan = as.factor(kisumu_data$orphan)
 
-#Electricity at Home. Use variable elec: 0 = no electricity, 1 = electricity 
-#kisumu_data = kisumu_data %>%
-#  mutate(elec = if_else(electricity == "yes", 1, 
-#                       if_else(electricity == "no", 0, 
-#                               if_else(is.na(electricity) == TRUE, 2, 2)))) %>%
-#  filter(elec != 2)
-
-#Family wealth. 
+# FAMILY WEALTH
+# Variable called fam.wealth -> low = 2, middle = 1, high = 0
 kisumu_data = kisumu_data %>%
   mutate(fam.wealth = if_else(family.wealth == "low", 2, 
                           if_else(family.wealth == "middle", 1,
                                   if_else(family.wealth == "high", 0, 3)))) %>% 
   filter(fam.wealth != 3)
 
+# Convert family wealth into a factor 
 kisumu_data$fam.wealth = as.factor(kisumu_data$fam.wealth)
 
-kisumu_data$survival.activities = as.factor(kisumu_data$survival.activities)
+# Subset dataset to variables of interest
 
 kisumu_filtered = kisumu_data %>%
   filter(ever.homeless == "yes") %>%
   select(subject.identification.number, orphan, onstrt_new, survival.activities, fam.wealth, edatt_cat_new, age) %>%
   na.omit(kisumu_data)
-
-#kisumu_filtered = kisumu_filtered %>% mutate(age_centered = age - 17)
 
 ###############################
 ### 1st Logistic Regression ###
@@ -98,28 +89,33 @@ elec.v.timestreet = glm(onstrt_new ~ elec,
 summary(elec.v.timestreet)
 
 # CREATING MODELS
-#For each covariate with a p-value < .2 add to model
+# For each covariate with a p-value < .2 add to model
+# AGE, ORPHAN, FAMILY WEALTH
 
-# Comparing Models w/ and without Orphan
+
+# COMPARING MODELS 
+
+# Model 1: Full model - education, orphan, age, family wealth
 model1 <- glm(onstrt_new ~ edatt_cat_new + orphan + age + fam.wealth, 
               family=binomial(link='logit'), data=kisumu_filtered)
 summary(model1)
 
-
+# Model 2: Simple model - education, orphan, age
 model2 <- glm(onstrt_new ~ edatt_cat_new + orphan + age,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
 
 
-
 # LIKELIHOOD RATIO TEST
+
 lrtest(model1, model2)
+
 # P-value: 0.01426
 # We reject the null that the simpler is better than the complex
 # We will use MODEL 1
 
 
-# ASSESSING COLLINEARITY
+# ASSESSING COLLINEARITY 
 vars <- kisumu_filtered %>%
   dplyr::select(onstrt_new, edatt_cat_new, age)
 
@@ -133,28 +129,24 @@ cor(vars)
 # No interaction - p-value of 0.33679
 age_edu = glm(onstrt_new ~ edatt_cat_new + age + age*edatt_cat_new, 
                family = binomial, data = kisumu_filtered)
-
 summary(age_edu)
 
 # Interaction between education and orphan 
 # No interaction - p-value of 0.2460
 orphan_edu = glm(onstrt_new ~ edatt_cat_new + age + orphan + edatt_cat_new*orphan, 
                family = binomial, data = kisumu_filtered)
-
 summary(orphan_edu)
 
 # Interaction between education and family wealth 
 # No interaction - p-value of 0.46858
 fam_edu = glm(onstrt_new ~ edatt_cat_new + age + fam.wealth + fam.wealth*edatt_cat_new, 
                family = binomial, data = kisumu_filtered)
-
 summary(fam_edu)
 
 # Interaction between orphan and family wealth 
 # No interaction - p-value of 0.46858
 inc_orphan = glm(onstrt_new ~ edatt_cat_new + age + fam.wealth + orphan + fam.wealth*orphan, 
               family = binomial, data = kisumu_filtered)
-
 summary(inc_orphan)
 
 # ASSESS COLLINEARITY
@@ -164,12 +156,8 @@ cor(vars_int)
 
 
 # LIKELIHOOD RATIO TEST 
-# Comparing interaction model with non-interaction model
-# We obtain a p-value of 0.0407, can reject the null hypothesis that the simpler model is better. 
-# We go with the model with the interaction. 
-
-#lrtest(age_edu, model2)
-
+# Because we have no significant interactions, we do not have to conduct a LRT. 
+# We default to MODEL 1. 
 
 ############################
 ### Goodness of Fit Test ###
@@ -179,7 +167,15 @@ cor(vars_int)
 
 hoslem.test(kisumu_filtered$edatt_cat_new, fitted(model1), g = 5)
 
+# p-value < 2.2e-16
+# We reject the null hypothesis that our model is a good fit. 
+# Our model is a terrible fit...
 
+
+
+############################
+### NOTES                ###
+############################
 
 #  Null hypothesis is that the model sufficiently fits my data
 # Stick with around five quantiles
@@ -201,14 +197,6 @@ hoslem.test(kisumu_filtered$edatt_cat_new, fitted(model1), g = 5)
 # We go with the model with the interaction. 
 
 #lrtest(elec_age, model1)
-
-
-
-
-test <- kisumu_filtered %>%
-  dplyr::select(elec, edatt_cat_new, age, elec)
-
-cor(test)
 
 
 
