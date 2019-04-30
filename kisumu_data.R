@@ -22,23 +22,28 @@ kisumu_data = read.csv("/Users/ijeamakaanyene/Desktop/Berkeley Coursework/Spring
 ## Outcome: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
 
 ## Confounders: 
-# Glue Sniffing. Use variable glue: 0 - no, 1 - yes
 
 #Age. Use variable age (keeping continuous)
+
+# Create variable with orphan (either parent) -> no = 0, single = 1, double = 2 
+kisumu_data = kisumu_data %>%
+  mutate(orphan = if_else(dborphan == "double orphan", 2, 
+                          if_else(dborphan == "single orphan", 1,
+                                  if_else(dborphan == "parents living", 0, 3)))) %>%
+  filter(orphan != 3)
 
 #Electricity at Home. Use variable elec: 0 = no electricity, 1 = electricity 
 kisumu_data = kisumu_data %>%
   mutate(elec = if_else(electricity == "yes", 1, 
                        if_else(electricity == "no", 0, 
-                               if_else(is.na(electricity) == TRUE, 2, 2))))
+                               if_else(is.na(electricity) == TRUE, 2, 2)))) %>%
+  filter(elec != 2)
 
 
 kisumu_filtered = kisumu_data %>%
   filter(ever.homeless == "yes") %>%
-  select(subject.identification.number, glue.ever, onstrt_new, edatt_cat_new, age, elec) %>%
-  mutate(glue = if_else(glue.ever == "yes", 1, if_else(glue.ever == "no", 0, 2))) %>% 
-  na.omit(kisumu_data) %>% 
-  filter(glue != 2, elec != 2)
+  select(subject.identification.number, orphan, onstrt_new, edatt_cat_new, age, elec) %>%
+  na.omit(kisumu_data)
 
 #kisumu_filtered = kisumu_filtered %>% mutate(age_centered = age - 17)
 
@@ -48,7 +53,7 @@ kisumu_filtered = kisumu_data %>%
 
 # PAIRWISE COMPARISONS
 
-# Test out ethnicity as a confounder. 
+# Test out orphan status as a confounder
 
 # Education and Length of Time on Street (unadjusted)
 # p-value: 0.309 
