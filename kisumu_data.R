@@ -12,7 +12,7 @@ library(ResourceSelection)
 #####################
 
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
-kisumu_data = read.csv("/Users/emilyliu/Desktop/Spring_2019/241 Stats/kisumu_241project/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
+kisumu_data = read.csv("~/Berkeley/Spring 2019/PH 241/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
 ## Exposure: Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
 ## Outcome: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
@@ -53,6 +53,18 @@ kisumu_filtered = kisumu_data %>%
 ###############################
 ### 1st Logistic Regression ###
 ###############################
+
+# Intercept
+# Odds of Disease given no exposure
+# Unexposed group = <= grade 5
+# Diseased group = >=1 year on street
+n_distinct(filter(kisumu_filtered, edatt_cat_new ==0 & onstrt_new ==1))
+n_distinct(filter(kisumu_filtered, edatt_cat_new == 0))
+prob <- 97/125
+den <- 1-prob
+odds <- log(prob/den)
+odds
+
 
 # PAIRWISE COMPARISONS
 
@@ -104,6 +116,8 @@ summary(model1)
 model2 <- glm(onstrt_new ~ edatt_cat_new + orphan + age,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
+exp(model2$coefficients)
+exp(confint(model2, level = 0.95))
 
 
 # LIKELIHOOD RATIO TEST
