@@ -8,7 +8,7 @@ $$log(\frac{p}{1-p}) = \beta_{0}$$
 $log(\frac{p}{1-p}) = \beta_{0} + \beta_{1}\textrm{education} + \beta_{2}\textrm{orphan}_{1} + \\\beta_{3}\textrm{orphan}_{2} + \beta_{4}\textrm{age} + \beta_{5}\textrm{family wealth}_{1} + \\\beta_{6}\textrm{family wealth}_{2}$
 
 
-$$log(\frac{p}{1-p}) = \beta_{0} + \beta_{1}\textrm{education} + \beta_{2}\textrm{orphan}_{1} + \beta_{3}\textrm{orphan}_{2} + \beta_{4}\textrm{age}$$
+$log(\frac{p}{1-p}) = \beta_{0} + \beta_{1}\textrm{education} + \beta_{2}\textrm{orphan}_{1} + \\\beta_{3}\textrm{orphan}_{2} + \beta_{4}\textrm{age}$
 
 $$log(\frac{p}{1-p}) = \beta_{0} + \beta_{1}\textrm{education} + \beta_{2}\textrm{age} + \beta_{3}\textrm{age*education}$$
 
