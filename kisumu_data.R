@@ -116,6 +116,8 @@ summary(model1)
 model2 <- glm(onstrt_new ~ edatt_cat_new + orphan + age,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
+exp(model2$coefficients)
+exp(confint(model2, level = 0.95))
 
 
 # LIKELIHOOD RATIO TEST
