@@ -12,7 +12,7 @@ library(ResourceSelection)
 #####################
 
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
-kisumu_data = read.csv("~/Berkeley/Spring 2019/PH 241/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
+kisumu_data = read.csv("/Users/ijeamakaanyene/kisumu_241project/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
 ## Exposure: Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
 ## Outcome: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
@@ -38,7 +38,7 @@ kisumu_data = kisumu_data %>%
   mutate(fam.wealth = if_else(family.wealth == "low", 2, 
                           if_else(family.wealth == "middle", 1,
                                   if_else(family.wealth == "high", 0, 3)))) %>% 
-  filter(fam.wealth != 3)
+  filter(fam.wealth != 3 & edatt_cat_new != 2)
 
 # Convert family wealth into a factor 
 kisumu_data$fam.wealth = as.factor(kisumu_data$fam.wealth)
@@ -69,7 +69,7 @@ odds
 # PAIRWISE COMPARISONS
 
 # Survival Activities and Length of Time on Street (unadjusted)
-# p-value: 0.5541 
+# p-value: 0.3144 
 sur.v.timestreet = glm(onstrt_new ~ survival.activities, family = binomial, data = kisumu_filtered)
 summary(sur.v.timestreet)
 
@@ -79,7 +79,7 @@ wealth.v.timestreet = glm(onstrt_new ~ fam.wealth, family = binomial, data = kis
 summary(wealth.v.timestreet)
 
 # Education and Length of Time on Street (unadjusted)
-# p-value: 0.522 
+# p-value: 0.0849
 edu.v.timestreet = glm(onstrt_new ~ edatt_cat_new, family = binomial, data = kisumu_filtered)
 summary(edu.v.timestreet)
 
@@ -90,15 +90,15 @@ orphan.v.timestreet<- glm(onstrt_new ~ orphan,
 summary(orphan.v.timestreet)
 
 # Age and Length on Time on Street (unadjusted)
-# p-value: 8.98e-07
+# p-value: 9.05e-07
 age.v.timestreet = glm(onstrt_new ~ age, family = binomial, data = kisumu_filtered)
 summary(age.v.timestreet)
 
 # Electricity at home and length of time on street (unadjusted)
 # p-vlue: 0.434
-elec.v.timestreet = glm(onstrt_new ~ elec,
-                   family=binomial(link='logit'), data=kisumu_filtered)
-summary(elec.v.timestreet)
+#elec.v.timestreet = glm(onstrt_new ~ elec,
+                   #family=binomial(link='logit'), data=kisumu_filtered)
+#summary(elec.v.timestreet)
 
 # CREATING MODELS
 # For each covariate with a p-value < .2 add to model
@@ -140,8 +140,8 @@ cor(vars)
 ###############################
 
 # Interaction between education and age
-# No interaction - p-value of 0.33679
-age_edu = glm(onstrt_new ~ edatt_cat_new + age + age*edatt_cat_new, 
+# Interaction - p-value of 0.15738 
+age_edu = glm(onstrt_new ~ edatt_cat_new + age + fam.wealth + orphan + age*edatt_cat_new, 
                family = binomial, data = kisumu_filtered)
 summary(age_edu)
 
@@ -168,6 +168,7 @@ vars_int = kisumu_filtered %>%
   select(edatt_cat_new, age)
 cor(vars_int)
 
+lrtest(model1, age_edu)
 
 # LIKELIHOOD RATIO TEST 
 # Because we have no significant interactions, we do not have to conduct a LRT. 
@@ -179,7 +180,7 @@ cor(vars_int)
 
 # GOODNESS OF FIT TEST
 
-hoslem.test(kisumu_filtered$edatt_cat_new, fitted(model1), g = 5)
+hoslem.test(kisumu_filtered$edatt_cat_new, fitted(age_edu), g = 5)
 
 # p-value < 2.2e-16
 # We reject the null hypothesis that our model is a good fit. 
