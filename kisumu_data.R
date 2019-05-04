@@ -12,7 +12,7 @@ library(ResourceSelection)
 #####################
 
 ## Recommendations - convert data file into a csv on your computer. Then update the below code with your file path string
-kisumu_data = read.csv("/Users/ijeamakaanyene/kisumu_241project/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
+kisumu_data = read.csv("~/Berkeley/Spring 2019/PH 241/Kisumu Street Youth Seroprevalence Data 9_28_2015.csv", header = TRUE)
 
 ## Exposure: Education. Use variable edatt_cat_new: 0 is <= grade 5, 1 is > grade 5
 ## Outcome: Length of Time on Street. Use variable onstrt_new: 0 - <1yr, 1 - >=1 yr
@@ -82,7 +82,9 @@ summary(wealth.v.timestreet)
 # p-value: 0.0849
 edu.v.timestreet = glm(onstrt_new ~ edatt_cat_new, family = binomial, data = kisumu_filtered)
 summary(edu.v.timestreet)
-
+lrtest(edu.v.timestreet)
+exp(edu.v.timestreet$coefficients)
+confint(edu.v.timestreet, level=0.95)
 # Orphan Status & Time on street (unadjusted )
 # p-value: 0.03823
 orphan.v.timestreet<- glm(onstrt_new ~ orphan,
@@ -111,13 +113,16 @@ summary(age.v.timestreet)
 model1 <- glm(onstrt_new ~ edatt_cat_new + orphan + age + fam.wealth, 
               family=binomial(link='logit'), data=kisumu_filtered)
 summary(model1)
-
+exp(model1$coefficients)
+exp(confint(model1, level=0.95))
+lrtest(model1)
 # Model 2: Simple model - education, orphan, age
 model2 <- glm(onstrt_new ~ edatt_cat_new + orphan + age,
                      family=binomial(link='logit'), data=kisumu_filtered)
 summary(model2)
 exp(model2$coefficients)
 exp(confint(model2, level = 0.95))
+lrtest(model2)
 
 
 # LIKELIHOOD RATIO TEST
